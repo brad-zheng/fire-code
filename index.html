@@ -115,29 +115,29 @@ body{background:#0a0a0f;color:#fff;font-family:-apple-system,BlinkMacSystemFont,
 <body>
 <div id="app">
 
-<!-- 鍏ュ彛椤?-->
+<!-- 入口页 -->
 <div class="view active" id="entry-view">
   <div class="entry-logo">
     <h1>FIRE CODE</h1>
-    <p>姹傝В鑷敱鐨勮窛绂?/p>
+    <p>求解自由的距离</p>
   </div>
   <div class="entry-subtitle">
     Financial Independence, Retire Early<br>
-    鍊掓帹娉曡绠椾綘鐨凢IRE鏈噾
+    倒推法计算你的FIRE本金
   </div>
   <div class="entry-btns">
     <div class="entry-btn" onclick="goStep()">
-      <div class="title">鎸夋楠わ紝姣忎釜闂閫愭濉啓</div>
-      <div class="desc">涓€姝ユ寮曞锛岃交鏉惧畬鎴?/div>
+      <div class="title">按步骤，每个问题逐步填写</div>
+      <div class="desc">一步步引导，轻松完成</div>
     </div>
     <div class="entry-btn" onclick="goQuick()">
-      <div class="title">涓嶅暟鍡︼紝妗嗘灦寮忕洿濉绠?/div>
-      <div class="desc">涓€椤靛～瀹岋紝绔嬪嵆鍑虹粨鏋?/div>
+      <div class="title">不啰嗦，框架式直填计算</div>
+      <div class="desc">一页填完，立即出结果</div>
     </div>
   </div>
 </div>
 
-<!-- 鍒嗘濉啓 -->
+<!-- 分步填写 -->
 <div class="view" id="step-view">
   <div class="step-progress">
     <span class="step-count" id="stepCount">1/9</span>
@@ -146,44 +146,44 @@ body{background:#0a0a0f;color:#fff;font-family:-apple-system,BlinkMacSystemFont,
   </div>
   <div id="stepContent"></div>
   <div class="step-nav">
-    <button class="btn btn-outline" id="stepPrev" onclick="stepPrev()">涓婁竴姝?/button>
-    <button class="btn" id="stepNext" onclick="stepNext()">涓嬩竴姝?/button>
+    <button class="btn btn-outline" id="stepPrev" onclick="stepPrev()">上一步</button>
+    <button class="btn" id="stepNext" onclick="stepNext()">下一步</button>
   </div>
 </div>
 
-<!-- 涓€椤靛紡濉啓 -->
+<!-- 一页式填写 -->
 <div class="view" id="quick-view">
-  <div class="quick-title">鍙傛暟濉啓</div>
-  <div class="quick-sub">濉畬鐐瑰嚮璁＄畻锛岀珛鍗虫眰瑙ｄ綘鐨凢IRE鏈噾</div>
+  <div class="quick-title">参数填写</div>
+  <div class="quick-sub">填完点击计算，立即求解你的FIRE本金</div>
   <div id="quickContent"></div>
-  <button class="btn" style="margin-top:20px" onclick="calculate()">璁＄畻</button>
+  <button class="btn" style="margin-top:20px" onclick="calculate()">计算</button>
 </div>
 
-<!-- 缁撴灉椤?-->
+<!-- 结果页 -->
 <div class="view" id="result-view">
   <div id="resultCapture">
     <div class="result-hero">
       <div class="label">YOUR FIRE CODE</div>
-      <div class="value" id="resultZ">鈥?/div>
-      <div class="unit">涓囧厓</div>
+      <div class="value" id="resultZ">—</div>
+      <div class="unit">万元</div>
     </div>
     <div class="result-summary" id="resultSummary"></div>
     <div class="result-table" id="resultTable"></div>
-    <div style="text-align:center;padding:20px 0 8px;font-size:12px;color:#444;letter-spacing:2px">閮戝ぇ閽?鍑哄搧</div>
+    <div style="text-align:center;padding:20px 0 8px;font-size:12px;color:#444;letter-spacing:2px">郑大钱 出品</div>
   </div>
   <div class="result-actions">
-    <button class="btn btn-outline" onclick="exportImg()">瀵煎嚭鍥剧墖</button>
-    <button class="btn" onclick="recalc()">閲嶆柊璁＄畻</button>
+    <button class="btn btn-outline" onclick="exportImg()">导出图片</button>
+    <button class="btn" onclick="recalc()">重新计算</button>
   </div>
 </div>
 
-<!-- 鍒嗕韩閰嶅浘 -->
+<!-- 分享配图 -->
 <div class="share-img" id="shareImg"><span>FIRE CODE</span></div>
 
 </div>
 
 <script>
-// ===== 鏁版嵁妯″瀷 =====
+// ===== 数据模型 =====
 var data = {
   age: 30,
   fireAge: 45,
@@ -197,21 +197,21 @@ var data = {
 };
 
 var steps = [
-  {key:'age', label:'浣犵殑褰撳墠骞撮緞', unit:'宀?, min:18, max:80, step:1, hint:''},
-  {key:'fireAge', label:'甯屾湜FIRE鐨勫勾榫?, unit:'宀?, min:'age', max:75, step:1, hint:''},
-  {key:'retireAge', label:'鍙互棰嗗彇閫€浼戦噾鐨勫勾榫?, unit:'宀?, min:'age', max:80, step:1, hint:''},
-  {key:'lifeExp', label:'棰勬湡瀵垮懡', unit:'宀?, min:'retireAge', max:120, step:1, hint:''},
-  {key:'annualSpend', label:'FIRE鍚庢瘡骞存敮鍑鸿垂鐢?, unit:'涓囧厓', min:1, max:200, step:1, hint:''},
-  {key:'returnRate', label:'棰勬湡骞村寲鏀剁泭鐜?, unit:'%', min:0, max:30, step:0.1, hint:'褰撳墠閾惰3骞存湡瀹氬瓨鍒╃巼绾?.25%'},
-  {key:'inflation', label:'棰勬湡閫氳揣鑶ㄨ儉鐜?, unit:'%', min:0, max:20, step:0.1, hint:'杩?0骞村钩鍧囬€氳儉鐜囩害1.9%锛岃繎15骞寸害2.2%锛屽疄闄呴€氳揣鑶ㄨ儉鐜囧彲鑳介珮浜庝笂杩板弬鑰冨€?},
-  {key:'keepPrincipal', label:'閫€浼戞椂鏄惁淇濈暀涓€绗旀湰閲?, type:'toggle', hint:''},
-  {key:'principalAmt', label:'淇濈暀鏈噾閲戦', unit:'涓囧厓', min:0, max:5000, step:10, hint:'', cond:'keepPrincipal'}
+  {key:'age', label:'你的当前年龄', unit:'岁', min:18, max:80, step:1, hint:''},
+  {key:'fireAge', label:'希望FIRE的年龄', unit:'岁', min:'age', max:75, step:1, hint:''},
+  {key:'retireAge', label:'可以领取退休金的年龄', unit:'岁', min:'age', max:80, step:1, hint:''},
+  {key:'lifeExp', label:'预期寿命', unit:'岁', min:'retireAge', max:120, step:1, hint:''},
+  {key:'annualSpend', label:'FIRE后每年支出费用', unit:'万元', min:1, max:200, step:1, hint:''},
+  {key:'returnRate', label:'预期年化收益率', unit:'%', min:0, max:30, step:0.1, hint:'当前银行3年期定存利率约1.25%'},
+  {key:'inflation', label:'预期通货膨胀率', unit:'%', min:0, max:20, step:0.1, hint:'近10年平均通胀率约1.9%，近15年约2.2%，实际通货膨胀率可能高于上述参考值'},
+  {key:'keepPrincipal', label:'退休时是否保留一笔本金', type:'toggle', hint:''},
+  {key:'principalAmt', label:'保留本金金额', unit:'万元', min:0, max:5000, step:10, hint:'', cond:'keepPrincipal'}
 ];
 
 var stepIdx = 0;
 var lastSchedule = [];
 
-// ===== 瀵艰埅 =====
+// ===== 导航 =====
 function showView(id){
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
   document.getElementById(id).classList.add('active');
@@ -219,13 +219,13 @@ function showView(id){
 function goStep(){stepIdx=0;renderStep();showView('step-view')}
 function goQuick(){renderQuick();showView('quick-view')}
 
-// ===== 杈呭姪 =====
+// ===== 辅助 =====
 function getVal(v){
   if(typeof v==='string'&&data[v]!==undefined)return data[v];
   return v;
 }
 
-// ===== 鍒嗘妯″紡 =====
+// ===== 分步模式 =====
 function renderStep(){
   var s = steps[stepIdx];
   if(s.cond && !data[s.cond]){
@@ -235,7 +235,7 @@ function renderStep(){
   }
   if(stepIdx>=steps.length){calculate();return}
   
-  // 鍔ㄦ€佽绠楁鏁帮紙鎺掗櫎闅愯棌鐨刢ond椤癸級
+  // 动态计算步数（排除隐藏的cond项）
   var visibleSteps = steps.filter(function(st){return !st.cond || data[st.cond]});
   var visibleIdx = visibleSteps.indexOf(s);
   
@@ -245,7 +245,7 @@ function renderStep(){
   
   var prevBtn=document.getElementById('stepPrev');
   prevBtn.style.visibility=visibleIdx===0?'hidden':'visible';
-  document.getElementById('stepNext').textContent=visibleIdx===visibleSteps.length-1?'璁＄畻':'涓嬩竴姝?;
+  document.getElementById('stepNext').textContent=visibleIdx===visibleSteps.length-1?'计算':'下一步';
   
   var min=getVal(s.min),max=getVal(s.max);
   var c='';
@@ -253,8 +253,9 @@ function renderStep(){
   if(s.type==='toggle'){
     c+='<div class="step-question">'+s.label+'</div>';
     c+='<div class="step-hint">'+(s.hint||'')+'</div>';
-    c+='<div class="toggle-wrap"><div class="toggle'+(data[s.key]?' on':'')+'" id="stepToggle" onclick="stepToggle()"></div><span class="toggle-label" id="stepToggleLabel">'+(data[s.key]?'鏄?:'鍚?)+'</span></div>';
-    // 濡傛灉閫?鏄?涓斿綋鍓嶆槸keepPrincipal锛屾樉绀洪噾棰濊緭鍏?    if(data[s.key] && s.key==='keepPrincipal'){
+    c+='<div class="toggle-wrap"><div class="toggle'+(data[s.key]?' on':'')+'" id="stepToggle" onclick="stepToggle()"></div><span class="toggle-label" id="stepToggleLabel">'+(data[s.key]?'是':'否')+'</span></div>';
+    // 如果选"是"且当前是keepPrincipal，显示金额输入
+    if(data[s.key] && s.key==='keepPrincipal'){
       var pStep=steps[steps.length-1];
       c+='<div id="stepExtra" style="margin-top:20px;animation:fadeIn .3s ease">';
       c+='<div class="form-label">'+pStep.label+'</div>';
@@ -276,8 +277,8 @@ function stepToggle(){
   var isOn=!t.classList.contains('on');
   t.classList.toggle('on');
   data.keepPrincipal=isOn;
-  document.getElementById('stepToggleLabel').textContent=isOn?'鏄?:'鍚?;
-  // 閲嶆柊娓叉煋浠ユ樉绀?闅愯棌閲戦杈撳叆
+  document.getElementById('stepToggleLabel').textContent=isOn?'是':'否';
+  // 重新渲染以显示/隐藏金额输入
   renderStep();
 }
 
@@ -307,7 +308,8 @@ function stepNext(){
     data[s.key]=t.classList.contains('on');
   }
   stepIdx++;
-  // 璺宠繃cond椤癸紙宸插湪toggle椤靛唴濉啓锛?  while(stepIdx<steps.length&&steps[stepIdx].cond)stepIdx++;
+  // 跳过cond项（已在toggle页内填写）
+  while(stepIdx<steps.length&&steps[stepIdx].cond)stepIdx++;
   if(stepIdx>=steps.length){calculate();return}
   renderStep();
 }
@@ -318,7 +320,7 @@ function stepPrev(){
   renderStep();
 }
 
-// ===== 涓€椤靛紡妯″紡 =====
+// ===== 一页式模式 =====
 function renderQuick(){
   var c='';
   steps.forEach(function(s,idx){
@@ -327,7 +329,7 @@ function renderQuick(){
     if(s.type==='toggle'){
       c+='<div class="form-group" id="fg-'+s.key+'">';
       c+='<label class="form-label">'+s.label+'</label>';
-      c+='<div class="toggle-wrap"><div class="toggle'+(data[s.key]?' on':'')+'" onclick="quickToggle()"></div><span class="toggle-label" id="quickToggleLabel">'+(data[s.key]?'鏄?:'鍚?)+'</span></div>';
+      c+='<div class="toggle-wrap"><div class="toggle'+(data[s.key]?' on':'')+'" onclick="quickToggle()"></div><span class="toggle-label" id="quickToggleLabel">'+(data[s.key]?'是':'否')+'</span></div>';
       c+='</div>';
     }else{
       c+='<div class="form-group" id="fg-'+s.key+'">';
@@ -357,7 +359,7 @@ function quickSync(key,val,sliderId,numId){
   if(n&&n.value!=val)n.value=val;
 }
 
-// ===== 璁＄畻 =====
+// ===== 计算 =====
 function calculate(){
   var X1=data.annualSpend;
   var Y1=data.inflation/100;
@@ -366,7 +368,7 @@ function calculate(){
   var X=data.keepPrincipal?data.principalAmt:0;
   
   if(A<=0){
-    document.getElementById('resultZ').textContent='鍙傛暟寮傚父';
+    document.getElementById('resultZ').textContent='参数异常';
     showView('result-view');
     return;
   }
@@ -379,7 +381,7 @@ function calculate(){
     Z=X/Math.pow(1+Y2,A)+X1*(1-Math.pow(r,A))/(1-r);
   }
   
-  // 閫愬勾妯℃嫙
+  // 逐年模拟
   var schedule=[];
   var principal=Z;
   for(var i=0;i<A;i++){
@@ -390,54 +392,55 @@ function calculate(){
   }
   lastSchedule=schedule;
   
-  // 鎵炬渶澶у€肩敤浜庢潯褰㈠浘姣斾緥
+  // 找最大值用于条形图比例
   var maxSpend=schedule[0].spending, maxPrincipal=Z;
   for(var i=0;i<schedule.length;i++){
     if(schedule[i].spending>maxSpend)maxSpend=schedule[i].spending;
     if(schedule[i].end>maxPrincipal)maxPrincipal=schedule[i].end;
   }
   
-  // 娓叉煋缁撴灉
+  // 渲染结果
   document.getElementById('resultZ').textContent=Math.round(Z).toLocaleString();
   
-  var summary='<div class="collapse-toggle" onclick="this.nextElementSibling.classList.toggle(\'collapsed\')">鍙傛暟鎽樿 鈻?/div>';
+  var summary='<div class="collapse-toggle" onclick="this.nextElementSibling.classList.toggle(\'collapsed\')">参数摘要 ▼</div>';
   summary+='<div>';
-  summary+='<div class="row"><span>褰撳墠骞撮緞</span><span>'+data.age+' 宀?/span></div>';
-  summary+='<div class="row"><span>FIRE骞撮緞</span><span>'+data.fireAge+' 宀?/span></div>';
-  summary+='<div class="row"><span>棰嗛€€浼戦噾骞撮緞</span><span>'+data.retireAge+' 宀?/span></div>';
-  summary+='<div class="row"><span>棰勬湡瀵垮懡</span><span>'+data.lifeExp+' 宀?/span></div>';
-  summary+='<div class="row"><span>FIRE鍚庡勾鏀嚭</span><span>'+data.annualSpend+' 涓?/span></div>';
-  summary+='<div class="row"><span>骞村寲鏀剁泭鐜?/span><span>'+data.returnRate+'%</span></div>';
-  summary+='<div class="row"><span>閫氳儉鐜?/span><span>'+data.inflation+'%</span></div>';
-  summary+='<div class="row"><span>鏈噾娑堣€楀勾鏁?/span><span>'+A+' 骞?/span></div>';
-  if(data.keepPrincipal)summary+='<div class="row"><span>淇濈暀鏈噾</span><span>'+data.principalAmt+' 涓?/span></div>';
+  summary+='<div class="row"><span>当前年龄</span><span>'+data.age+' 岁</span></div>';
+  summary+='<div class="row"><span>FIRE年龄</span><span>'+data.fireAge+' 岁</span></div>';
+  summary+='<div class="row"><span>领退休金年龄</span><span>'+data.retireAge+' 岁</span></div>';
+  summary+='<div class="row"><span>预期寿命</span><span>'+data.lifeExp+' 岁</span></div>';
+  summary+='<div class="row"><span>FIRE后年支出</span><span>'+data.annualSpend+' 万</span></div>';
+  summary+='<div class="row"><span>年化收益率</span><span>'+data.returnRate+'%</span></div>';
+  summary+='<div class="row"><span>通胀率</span><span>'+data.inflation+'%</span></div>';
+  summary+='<div class="row"><span>本金消耗年数</span><span>'+A+' 年</span></div>';
+  if(data.keepPrincipal)summary+='<div class="row"><span>保留本金</span><span>'+data.principalAmt+' 万</span></div>';
   summary+='</div>';
   summary+='<div style="font-size:10px;color:#444;line-height:1.8;margin-top:12px;padding-top:12px;border-top:1px solid #1a1a25">';
-  summary+='鏍哥畻鍓嶆彁涓烘病鏈夊€哄姟锛屾墍鏈夎祫浜у潎鎸囩幇閲戣祫浜?br>';
-  summary+='闄よ嚜浣忔埧浠ュ鐨勪笉鍔ㄤ骇鎴栧叾浠栬祫浜ц鎶樺悎鎴愮幇閲戣祫浜ц绠?br>';
-  summary+='閫€浼戝悗涓嶅啀鏍哥畻骞存敮鍑猴紝榛樿鐢卞吇鑰侀噾鎴栭€€浼戞椂淇濈暀鏈噾鍏ㄩ瑕嗙洊';
+  summary+='核算前提为没有债务，所有资产均指现金资产<br>';
+  summary+='除自住房以外的不动产或其他资产请折合成现金资产计算<br>';
+  summary+='退休后不再核算年支出，默认由养老金或退休时保留本金全额覆盖';
   summary+='</div>';
   document.getElementById('resultSummary').innerHTML=summary;
   
-  // 琛ㄦ牸 - 甯︽潯褰㈠浘 + 鍒嗘鎶樺彔
-  var tbl='<div class="th"><div class="td">骞翠唤</div><div class="td">褰撳勾鏀嚭(涓?<span class="sub-note">鏀嚭闅忛€氳儉鐜囧闀?/span></div><div class="td">骞存湯鏈噾(涓?<span class="sub-note">鍓╀綑鏈噾鎸夋敹鐩婄巼缁х画澧炲€?/span></div></div>';
+  // 表格 - 带条形图 + 分段折叠
+  var tbl='<div class="th"><div class="td">年份</div><div class="td">当年支出(万)<span class="sub-note">支出随通胀率增长</span></div><div class="td">年末本金(万)<span class="sub-note">剩余本金按收益率继续增值</span></div></div>';
   
-  // 鍏ㄩ儴灞曞紑/鎶樺彔鎸夐挳锛堜粎鍒嗘妯″紡锛?  if(schedule.length>10){
-    tbl+='<div id="exportBtnBar" style="display:flex;gap:8px;padding:8px 12px;background:#1a1a25;border-bottom:1px solid #222"><button class="btn-outline" style="flex:1;padding:8px;font-size:12px;border-radius:8px;border:1px solid #333;color:#aaa;background:transparent" onclick="expandAll()">鍏ㄩ儴灞曞紑</button><button class="btn-outline" style="flex:1;padding:8px;font-size:12px;border-radius:8px;border:1px solid #333;color:#aaa;background:transparent" onclick="collapseAll()">鍏ㄩ儴鎶樺彔</button></div>';
+  // 全部展开/折叠按钮（仅分段模式）
+  if(schedule.length>10){
+    tbl+='<div id="exportBtnBar" style="display:flex;gap:8px;padding:8px 12px;background:#1a1a25;border-bottom:1px solid #222"><button class="btn-outline" style="flex:1;padding:8px;font-size:12px;border-radius:8px;border:1px solid #333;color:#aaa;background:transparent" onclick="expandAll()">全部展开</button><button class="btn-outline" style="flex:1;padding:8px;font-size:12px;border-radius:8px;border:1px solid #333;color:#aaa;background:transparent" onclick="collapseAll()">全部折叠</button></div>';
   }
   
   if(schedule.length<=10){
-    // 涓嶅垎娈碉紝鍏ㄩ儴鏄剧ず
+    // 不分段，全部显示
     schedule.forEach(function(r){
       var spendPct=Math.round(r.spending/maxSpend*100);
       var principalPct=Math.round(r.end/maxPrincipal*100);
-      tbl+='<div class="tr"><div class="td">绗?+r.year+'骞?/div>';
+      tbl+='<div class="tr"><div class="td">第'+r.year+'年</div>';
       tbl+='<div class="td">'+r.spending.toFixed(2)+'<div class="bar-bg"><div class="bar-fill bar-spend" style="width:'+spendPct+'%"></div></div></div>';
       tbl+='<div class="td">'+r.end.toFixed(2)+'<div class="bar-bg"><div class="bar-fill bar-principal" style="width:'+principalPct+'%"></div></div></div>';
       tbl+='</div>';
     });
   }else{
-    // 鍒?0娈碉紝姣忔鎶樺彔
+    // 分10段，每段折叠
     var segCount=10;
     var segSize=Math.ceil(schedule.length/segCount);
     for(var seg=0;seg<segCount;seg++){
@@ -447,14 +450,15 @@ function calculate(){
       
       var segStartYear=schedule[startIdx].year;
       var segEndYear=schedule[endIdx-1].year;      
-      // 娈垫爣棰?      tbl+='<div class="segment-toggle" onclick="toggleSegment('+seg+')">绗?+segStartYear+'骞?- 绗?+segEndYear+'骞?鈻?/div>';
+      // 段标题
+      tbl+='<div class="segment-toggle" onclick="toggleSegment('+seg+')">第'+segStartYear+'年 - 第'+segEndYear+'年 ▼</div>';
       tbl+='<div id="seg-'+seg+'" >';
       
       for(var i=startIdx;i<endIdx;i++){
         var r=schedule[i];
         var spendPct=Math.round(r.spending/maxSpend*100);
         var principalPct=Math.round(r.end/maxPrincipal*100);
-        tbl+='<div class="tr"><div class="td">绗?+r.year+'骞?/div>';
+        tbl+='<div class="tr"><div class="td">第'+r.year+'年</div>';
         tbl+='<div class="td">'+r.spending.toFixed(2)+'<div class="bar-bg"><div class="bar-fill bar-spend" style="width:'+spendPct+'%"></div></div></div>';
         tbl+='<div class="td">'+r.end.toFixed(2)+'<div class="bar-bg"><div class="bar-fill bar-principal" style="width:'+principalPct+'%"></div></div></div>';
         tbl+='</div>';
@@ -478,20 +482,20 @@ function collapseAll(){
   document.querySelectorAll('[id^=seg-]').forEach(function(el){el.classList.add('segment-collapsed')});
 }
 
-// ===== 閲嶆柊璁＄畻 =====
+// ===== 重新计算 =====
 function recalc(){
   renderQuick();
   showView('quick-view');
 }
 
-// ===== 瀵煎嚭鍥剧墖 =====
+// ===== 导出图片 =====
 function exportImg(){
-  // 灞曞紑鎵€鏈夋姌鍙犳
+  // 展开所有折叠段
   document.querySelectorAll('.segment-collapsed').forEach(function(el){el.classList.remove('segment-collapsed')});
-  // 灞曞紑鍙傛暟鎽樿
+  // 展开参数摘要
   var summaryDiv=document.querySelector('#resultSummary .collapsed');
   if(summaryDiv)summaryDiv.classList.remove('collapsed');
-  // 闅愯棌鍏ㄩ儴灞曞紑/鎶樺彔鎸夐挳
+  // 隐藏全部展开/折叠按钮
   var btnBar=document.getElementById('exportBtnBar');
   if(btnBar)btnBar.style.display='none';
   setTimeout(function(){
@@ -501,13 +505,13 @@ function exportImg(){
       link.download='fire-code.png';
       link.href=canvas.toDataURL('image/png');
       link.click();
-      // 鎭㈠鎸夐挳鏄剧ず
+      // 恢复按钮显示
       if(btnBar)btnBar.style.display='flex';
     });
   },200);
 }
 
-// ===== 鍒濆鍖?=====
+// ===== 初始化 =====
 renderQuick();
 </script>
 </body>
