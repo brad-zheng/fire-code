@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>FIRE CODE</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#0a0a0f;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.6;overflow-x:hidden;min-height:100vh}
+#app{max-width:480px;margin:0 auto;min-height:100vh;position:relative}
+.view{display:none;padding:24px 20px;animation:fadeIn .3s ease}
+.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Entry View */
+.entry-logo{text-align:center;padding:60px 0 40px}
+.entry-logo h1{font-size:42px;font-weight:800;letter-spacing:6px;background:linear-gradient(135deg,#00ffcc,#00aaff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.entry-logo p{color:#666;font-size:13px;margin-top:8px;letter-spacing:2px}
+.entry-subtitle{text-align:center;color:#aaa;font-size:14px;margin-bottom:50px;line-height:2}
+.entry-btns{display:flex;flex-direction:column;gap:16px;padding:0 20px}
+.entry-btn{background:#15151f;border:1px solid #333;border-radius:12px;padding:20px;color:#fff;text-align:center;cursor:pointer;transition:all .2s}
+.entry-btn:active{border-color:#00ffcc;transform:scale(.98)}
+.entry-btn .title{font-size:16px;font-weight:600}
+.entry-btn .desc{font-size:12px;color:#666;margin-top:6px}
+
+/* Step View */
+.step-progress{display:flex;align-items:center;justify-content:space-between;margin-bottom:30px}
+.step-bar{flex:1;height:3px;background:#222;border-radius:2px;margin:0 12px;overflow:hidden}
+.step-bar-fill{height:100%;background:linear-gradient(90deg,#00ffcc,#00aaff);transition:width .3s}
+.step-count{font-size:12px;color:#666;white-space:nowrap}
+.step-question{font-size:20px;font-weight:600;margin-bottom:8px}
+.step-hint{font-size:12px;color:#666;margin-bottom:24px;min-height:18px}
+.step-nav{display:flex;gap:12px;margin-top:30px}
+.step-nav button{flex:1}
+
+/* Form Controls */
+.form-group{margin-bottom:20px}
+.form-label{font-size:14px;color:#aaa;margin-bottom:8px;display:block}
+.form-hint{font-size:11px;color:#555;margin-top:6px;line-height:1.5}
+.slider-row{display:flex;align-items:center;gap:12px}
+.slider-row input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:#222;border-radius:2px;outline:none}
+.slider-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:#00ffcc;border-radius:50%;cursor:pointer;box-shadow:0 0 8px rgba(0,255,204,.4)}
+.slider-row input[type=range]::-moz-range-thumb{width:20px;height:20px;background:#00ffcc;border-radius:50%;cursor:pointer;border:none}
+.num-input{background:#15151f;border:1px solid #333;border-radius:8px;color:#fff;padding:10px 14px;font-size:16px;width:100px;text-align:center;outline:none}
+.num-input:focus{border-color:#00ffcc}
+.num-unit{color:#666;font-size:13px;white-space:nowrap}
+.input-row{display:flex;align-items:center;gap:8px}
+
+/* Toggle */
+.toggle-wrap{display:flex;align-items:center;gap:12px}
+.toggle{position:relative;width:48px;height:26px;background:#222;border-radius:13px;cursor:pointer;transition:background .2s}
+.toggle.on{background:#00ffcc}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .2s}
+.toggle.on::after{transform:translateX(22px);background:#0a0a0f}
+.toggle-label{font-size:14px;color:#aaa}
+
+/* Quick View */
+.quick-title{font-size:22px;font-weight:700;margin-bottom:6px}
+.quick-sub{font-size:12px;color:#666;margin-bottom:24px}
+
+/* Buttons */
+.btn{background:#00ffcc;color:#0a0a0f;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;text-align:center;transition:all .2s;width:100%}
+.btn:active{transform:scale(.98)}
+.btn-outline{background:transparent;border:1px solid #333;color:#aaa}
+.btn-outline:active{border-color:#00ffcc;color:#00ffcc}
+
+/* Result View */
+.result-hero{text-align:center;padding:30px 0 20px}
+.result-hero .label{font-size:12px;color:#666;letter-spacing:3px}
+.result-hero .value{font-size:48px;font-weight:800;background:linear-gradient(135deg,#00ffcc,#00aaff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:8px 0}
+.result-hero .unit{font-size:14px;color:#666}
+.result-summary{background:#15151f;border:1px solid #222;border-radius:12px;padding:16px;margin:20px 0}
+.result-summary .row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}
+.result-summary .row span:first-child{color:#666}
+.result-summary .row span:last-child{color:#fff}
+
+/* Result Table with bar chart */
+.result-table{background:#15151f;border:1px solid #222;border-radius:12px;overflow:hidden;margin:20px 0}
+.result-table .th{display:flex;background:#1a1a25;padding:10px 12px;font-size:11px;color:#666;border-bottom:1px solid #222}
+.result-table .th .td{position:relative}
+.result-table .th .sub-note{font-size:9px;color:#444;display:block;font-weight:normal;margin-top:2px}
+.result-table .tr{display:flex;padding:10px 12px;font-size:12px;border-bottom:1px solid #1a1a25;align-items:center}
+.result-table .tr:last-child{border-bottom:none}
+.result-table .td{flex:1;text-align:center;position:relative}
+.result-table .td:first-child{text-align:left;color:#666;flex:0.6}
+.result-table .td .bar-bg{width:100%;height:6px;background:#1a1a25;border-radius:3px;margin-top:4px;overflow:hidden}
+.result-table .td .bar-fill{height:100%;border-radius:3px}
+.result-table .td .bar-spend{background:#ff6b6b}
+.result-table .td .bar-principal{background:#00ffcc}
+.result-table .td:nth-child(2){color:#ff6b6b}
+.result-table .td:nth-child(3){color:#00ffcc}
+
+/* Collapsible segment */
+.segment-toggle{background:#1a1a25;padding:10px 12px;font-size:11px;color:#666;cursor:pointer;text-align:center;border-bottom:1px solid #222}
+.segment-toggle:active{color:#00ffcc}
+.segment-collapsed{display:none}
+
+.result-actions{display:flex;gap:12px;margin-top:24px}
+.result-actions button{flex:1}
+
+/* Share image hidden */
+.share-img{position:fixed;left:-9999px;top:0;width:300px;height:300px;background:#0a0a0f;display:flex;align-items:center;justify-content:center}
+.share-img span{font-size:36px;font-weight:800;letter-spacing:6px;background:linear-gradient(135deg,#00ffcc,#00aaff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* Collapsible summary */
+.collapse-toggle{font-size:12px;color:#666;cursor:pointer;text-align:center;padding:8px}
+.collapse-toggle:active{color:#00ffcc}
+.collapsed{display:none}
+
+/* Responsive */
+@media(max-width:380px){.entry-logo h1{font-size:34px}.result-hero .value{font-size:40px}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- 鍏ュ彛椤?-->
+<div class="view active" id="entry-view">
+  <div class="entry-logo">
+    <h1>FIRE CODE</h1>
+    <p>姹傝В鑷敱鐨勮窛绂?/p>
+  </div>
+  <div class="entry-subtitle">
+    Financial Independence, Retire Early<br>
+    鍊掓帹娉曡绠椾綘鐨凢IRE鏈噾
+  </div>
+  <div class="entry-btns">
+    <div class="entry-btn" onclick="goStep()">
+      <div class="title">鎸夋楠わ紝姣忎釜闂閫愭濉啓</div>
+      <div class="desc">涓€姝ユ寮曞锛岃交鏉惧畬鎴?/div>
+    </div>
+    <div class="entry-btn" onclick="goQuick()">
+      <div class="title">涓嶅暟鍡︼紝妗嗘灦寮忕洿濉绠?/div>
+      <div class="desc">涓€椤靛～瀹岋紝绔嬪嵆鍑虹粨鏋?/div>
+    </div>
+  </div>
+</div>
+
+<!-- 鍒嗘濉啓 -->
+<div class="view" id="step-view">
+  <div class="step-progress">
+    <span class="step-count" id="stepCount">1/9</span>
+    <div class="step-bar"><div class="step-bar-fill" id="stepBar"></div></div>
+    <span class="step-count" id="stepTotal">9</span>
+  </div>
+  <div id="stepContent"></div>
+  <div class="step-nav">
+    <button class="btn btn-outline" id="stepPrev" onclick="stepPrev()">涓婁竴姝?/button>
+    <button class="btn" id="stepNext" onclick="stepNext()">涓嬩竴姝?/button>
+  </div>
+</div>
+
+<!-- 涓€椤靛紡濉啓 -->
+<div class="view" id="quick-view">
+  <div class="quick-title">鍙傛暟濉啓</div>
+  <div class="quick-sub">濉畬鐐瑰嚮璁＄畻锛岀珛鍗虫眰瑙ｄ綘鐨凢IRE鏈噾</div>
+  <div id="quickContent"></div>
+  <button class="btn" style="margin-top:20px" onclick="calculate()">璁＄畻</button>
+</div>
+
+<!-- 缁撴灉椤?-->
+<div class="view" id="result-view">
+  <div id="resultCapture">
+    <div class="result-hero">
+      <div class="label">YOUR FIRE CODE</div>
+      <div class="value" id="resultZ">鈥?/div>
+      <div class="unit">涓囧厓</div>
+    </div>
+    <div class="result-summary" id="resultSummary"></div>
+    <div class="result-table" id="resultTable"></div>
+    <div style="text-align:center;padding:20px 0 8px;font-size:12px;color:#444;letter-spacing:2px">閮戝ぇ閽?鍑哄搧</div>
+  </div>
+  <div class="result-actions">
+    <button class="btn btn-outline" onclick="exportImg()">瀵煎嚭鍥剧墖</button>
+    <button class="btn" onclick="recalc()">閲嶆柊璁＄畻</button>
+  </div>
+</div>
+
+<!-- 鍒嗕韩閰嶅浘 -->
+<div class="share-img" id="shareImg"><span>FIRE CODE</span></div>
+
+</div>
+
+<script>
+// ===== 鏁版嵁妯″瀷 =====
+var data = {
+  age: 30,
+  fireAge: 45,
+  retireAge: 60,
+  lifeExp: 85,
+  annualSpend: 15,
+  returnRate: 7,
+  inflation: 2.5,
+  keepPrincipal: false,
+  principalAmt: 100
+};
+
+var steps = [
+  {key:'age', label:'浣犵殑褰撳墠骞撮緞', unit:'宀?, min:18, max:80, step:1, hint:''},
+  {key:'fireAge', label:'甯屾湜FIRE鐨勫勾榫?, unit:'宀?, min:'age', max:75, step:1, hint:''},
+  {key:'retireAge', label:'鍙互棰嗗彇閫€浼戦噾鐨勫勾榫?, unit:'宀?, min:'age', max:80, step:1, hint:''},
+  {key:'lifeExp', label:'棰勬湡瀵垮懡', unit:'宀?, min:'retireAge', max:120, step:1, hint:''},
+  {key:'annualSpend', label:'FIRE鍚庢瘡骞存敮鍑鸿垂鐢?, unit:'涓囧厓', min:1, max:200, step:1, hint:''},
+  {key:'returnRate', label:'棰勬湡骞村寲鏀剁泭鐜?, unit:'%', min:0, max:30, step:0.1, hint:'褰撳墠閾惰3骞存湡瀹氬瓨鍒╃巼绾?.25%'},
+  {key:'inflation', label:'棰勬湡閫氳揣鑶ㄨ儉鐜?, unit:'%', min:0, max:20, step:0.1, hint:'杩?0骞村钩鍧囬€氳儉鐜囩害1.9%锛岃繎15骞寸害2.2%锛屽疄闄呴€氳揣鑶ㄨ儉鐜囧彲鑳介珮浜庝笂杩板弬鑰冨€?},
+  {key:'keepPrincipal', label:'閫€浼戞椂鏄惁淇濈暀涓€绗旀湰閲?, type:'toggle', hint:''},
+  {key:'principalAmt', label:'淇濈暀鏈噾閲戦', unit:'涓囧厓', min:0, max:5000, step:10, hint:'', cond:'keepPrincipal'}
+];
+
+var stepIdx = 0;
+var lastSchedule = [];
+
+// ===== 瀵艰埅 =====
+function showView(id){
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
+  document.getElementById(id).classList.add('active');
+}
+function goStep(){stepIdx=0;renderStep();showView('step-view')}
+function goQuick(){renderQuick();showView('quick-view')}
+
+// ===== 杈呭姪 =====
+function getVal(v){
+  if(typeof v==='string'&&data[v]!==undefined)return data[v];
+  return v;
+}
+
+// ===== 鍒嗘妯″紡 =====
+function renderStep(){
+  var s = steps[stepIdx];
+  if(s.cond && !data[s.cond]){
+    stepIdx++;
+    if(stepIdx<steps.length){renderStep();return}
+    else{calculate();return}
+  }
+  if(stepIdx>=steps.length){calculate();return}
+  
+  // 鍔ㄦ€佽绠楁鏁帮紙鎺掗櫎闅愯棌鐨刢ond椤癸級
+  var visibleSteps = steps.filter(function(st){return !st.cond || data[st.cond]});
+  var visibleIdx = visibleSteps.indexOf(s);
+  
+  document.getElementById('stepCount').textContent=(visibleIdx+1)+'/'+visibleSteps.length;
+  document.getElementById('stepTotal').textContent=visibleSteps.length;
+  document.getElementById('stepBar').style.width=((visibleIdx+1)/visibleSteps.length*100)+'%';
+  
+  var prevBtn=document.getElementById('stepPrev');
+  prevBtn.style.visibility=visibleIdx===0?'hidden':'visible';
+  document.getElementById('stepNext').textContent=visibleIdx===visibleSteps.length-1?'璁＄畻':'涓嬩竴姝?;
+  
+  var min=getVal(s.min),max=getVal(s.max);
+  var c='';
+  
+  if(s.type==='toggle'){
+    c+='<div class="step-question">'+s.label+'</div>';
+    c+='<div class="step-hint">'+(s.hint||'')+'</div>';
+    c+='<div class="toggle-wrap"><div class="toggle'+(data[s.key]?' on':'')+'" id="stepToggle" onclick="stepToggle()"></div><span class="toggle-label" id="stepToggleLabel">'+(data[s.key]?'鏄?:'鍚?)+'</span></div>';
+    // 濡傛灉閫?鏄?涓斿綋鍓嶆槸keepPrincipal锛屾樉绀洪噾棰濊緭鍏?    if(data[s.key] && s.key==='keepPrincipal'){
+      var pStep=steps[steps.length-1];
+      c+='<div id="stepExtra" style="margin-top:20px;animation:fadeIn .3s ease">';
+      c+='<div class="form-label">'+pStep.label+'</div>';
+      c+='<div class="slider-row"><input type="range" id="stepRange2" min="'+getVal(pStep.min)+'" max="'+getVal(pStep.max)+'" step="'+pStep.step+'" value="'+data.principalAmt+'" oninput="syncStepExtra(this.value)"></div>';
+      c+='<div class="input-row" style="margin-top:12px;justify-content:center"><input type="number" class="num-input" id="stepNum2" min="'+getVal(pStep.min)+'" max="'+getVal(pStep.max)+'" step="'+pStep.step+'" value="'+data.principalAmt+'" oninput="syncStepExtra(this.value)"><span class="num-unit">'+pStep.unit+'</span></div>';
+      c+='</div>';
+    }
+  }else{
+    c+='<div class="step-question">'+s.label+'</div>';
+    c+='<div class="step-hint">'+(s.hint||'')+'</div>';
+    c+='<div class="slider-row"><input type="range" id="stepRange" min="'+min+'" max="'+max+'" step="'+s.step+'" value="'+data[s.key]+'" oninput="syncStep(this.value)"></div>';
+    c+='<div class="input-row" style="margin-top:12px;justify-content:center"><input type="number" class="num-input" id="stepNum" min="'+min+'" max="'+max+'" step="'+s.step+'" value="'+data[s.key]+'" oninput="syncStep(this.value)"><span class="num-unit">'+s.unit+'</span></div>';
+  }
+  document.getElementById('stepContent').innerHTML=c;
+}
+
+function stepToggle(){
+  var t=document.getElementById('stepToggle');
+  var isOn=!t.classList.contains('on');
+  t.classList.toggle('on');
+  data.keepPrincipal=isOn;
+  document.getElementById('stepToggleLabel').textContent=isOn?'鏄?:'鍚?;
+  // 閲嶆柊娓叉煋浠ユ樉绀?闅愯棌閲戦杈撳叆
+  renderStep();
+}
+
+function syncStep(v){
+  var s=steps[stepIdx];
+  v=parseFloat(v);
+  if(isNaN(v))return;
+  data[s.key]=v;
+  var r=document.getElementById('stepRange'),n=document.getElementById('stepNum');
+  if(r&&r.value!=v)r.value=v;
+  if(n&&n.value!=v)n.value=v;
+}
+
+function syncStepExtra(v){
+  v=parseFloat(v);
+  if(isNaN(v))return;
+  data.principalAmt=v;
+  var r=document.getElementById('stepRange2'),n=document.getElementById('stepNum2');
+  if(r&&r.value!=v)r.value=v;
+  if(n&&n.value!=v)n.value=v;
+}
+
+function stepNext(){
+  var s=steps[stepIdx];
+  if(s.type==='toggle'){
+    var t=document.getElementById('stepToggle');
+    data[s.key]=t.classList.contains('on');
+  }
+  stepIdx++;
+  // 璺宠繃cond椤癸紙宸插湪toggle椤靛唴濉啓锛?  while(stepIdx<steps.length&&steps[stepIdx].cond)stepIdx++;
+  if(stepIdx>=steps.length){calculate();return}
+  renderStep();
+}
+function stepPrev(){
+  stepIdx--;
+  while(stepIdx>=0&&steps[stepIdx].cond)stepIdx--;
+  if(stepIdx<0)stepIdx=0;
+  renderStep();
+}
+
+// ===== 涓€椤靛紡妯″紡 =====
+function renderQuick(){
+  var c='';
+  steps.forEach(function(s,idx){
+    if(s.cond&&!data[s.cond])return;
+    var min=getVal(s.min),max=getVal(s.max);
+    if(s.type==='toggle'){
+      c+='<div class="form-group" id="fg-'+s.key+'">';
+      c+='<label class="form-label">'+s.label+'</label>';
+      c+='<div class="toggle-wrap"><div class="toggle'+(data[s.key]?' on':'')+'" onclick="quickToggle()"></div><span class="toggle-label" id="quickToggleLabel">'+(data[s.key]?'鏄?:'鍚?)+'</span></div>';
+      c+='</div>';
+    }else{
+      c+='<div class="form-group" id="fg-'+s.key+'">';
+      c+='<label class="form-label">'+s.label+'</label>';
+      var sliderId='qslider-'+s.key;
+      var numId='qnum-'+s.key;
+      c+='<div class="slider-row"><input type="range" id="'+sliderId+'" min="'+min+'" max="'+max+'" step="'+s.step+'" value="'+data[s.key]+'" oninput="quickSync(\''+s.key+'\',this.value,\''+sliderId+'\',\''+numId+'\')"><input type="number" class="num-input" id="'+numId+'" min="'+min+'" max="'+max+'" step="'+s.step+'" value="'+data[s.key]+'" oninput="quickSync(\''+s.key+'\',this.value,\''+sliderId+'\',\''+numId+'\')"><span class="num-unit">'+s.unit+'</span></div>';
+      if(s.hint)c+='<div class="form-hint">'+s.hint+'</div>';
+      c+='</div>';
+    }
+  });
+  document.getElementById('quickContent').innerHTML=c;
+}
+
+function quickToggle(){
+  data.keepPrincipal=!data.keepPrincipal;
+  renderQuick();
+}
+
+function quickSync(key,val,sliderId,numId){
+  val=parseFloat(val);
+  if(isNaN(val))return;
+  data[key]=val;
+  var s=document.getElementById(sliderId);
+  var n=document.getElementById(numId);
+  if(s&&s.value!=val)s.value=val;
+  if(n&&n.value!=val)n.value=val;
+}
+
+// ===== 璁＄畻 =====
+function calculate(){
+  var X1=data.annualSpend;
+  var Y1=data.inflation/100;
+  var Y2=data.returnRate/100;
+  var A=data.retireAge-data.fireAge;
+  var X=data.keepPrincipal?data.principalAmt:0;
+  
+  if(A<=0){
+    document.getElementById('resultZ').textContent='鍙傛暟寮傚父';
+    showView('result-view');
+    return;
+  }
+  
+  var r=(1+Y1)/(1+Y2);
+  var Z;
+  if(Math.abs(Y2-Y1)<0.0001){
+    Z=X/Math.pow(1+Y2,A)+X1*A;
+  }else{
+    Z=X/Math.pow(1+Y2,A)+X1*(1-Math.pow(r,A))/(1-r);
+  }
+  
+  // 閫愬勾妯℃嫙
+  var schedule=[];
+  var principal=Z;
+  for(var i=0;i<A;i++){
+    var spending=X1*Math.pow(1+Y1,i);
+    principal-=spending;
+    principal*=(1+Y2);
+    schedule.push({year:i+1,spending:spending,end:principal});
+  }
+  lastSchedule=schedule;
+  
+  // 鎵炬渶澶у€肩敤浜庢潯褰㈠浘姣斾緥
+  var maxSpend=schedule[0].spending, maxPrincipal=Z;
+  for(var i=0;i<schedule.length;i++){
+    if(schedule[i].spending>maxSpend)maxSpend=schedule[i].spending;
+    if(schedule[i].end>maxPrincipal)maxPrincipal=schedule[i].end;
+  }
+  
+  // 娓叉煋缁撴灉
+  document.getElementById('resultZ').textContent=Math.round(Z).toLocaleString();
+  
+  var summary='<div class="collapse-toggle" onclick="this.nextElementSibling.classList.toggle(\'collapsed\')">鍙傛暟鎽樿 鈻?/div>';
+  summary+='<div>';
+  summary+='<div class="row"><span>褰撳墠骞撮緞</span><span>'+data.age+' 宀?/span></div>';
+  summary+='<div class="row"><span>FIRE骞撮緞</span><span>'+data.fireAge+' 宀?/span></div>';
+  summary+='<div class="row"><span>棰嗛€€浼戦噾骞撮緞</span><span>'+data.retireAge+' 宀?/span></div>';
+  summary+='<div class="row"><span>棰勬湡瀵垮懡</span><span>'+data.lifeExp+' 宀?/span></div>';
+  summary+='<div class="row"><span>FIRE鍚庡勾鏀嚭</span><span>'+data.annualSpend+' 涓?/span></div>';
+  summary+='<div class="row"><span>骞村寲鏀剁泭鐜?/span><span>'+data.returnRate+'%</span></div>';
+  summary+='<div class="row"><span>閫氳儉鐜?/span><span>'+data.inflation+'%</span></div>';
+  summary+='<div class="row"><span>鏈噾娑堣€楀勾鏁?/span><span>'+A+' 骞?/span></div>';
+  if(data.keepPrincipal)summary+='<div class="row"><span>淇濈暀鏈噾</span><span>'+data.principalAmt+' 涓?/span></div>';
+  summary+='</div>';
+  summary+='<div style="font-size:10px;color:#444;line-height:1.8;margin-top:12px;padding-top:12px;border-top:1px solid #1a1a25">';
+  summary+='鏍哥畻鍓嶆彁涓烘病鏈夊€哄姟锛屾墍鏈夎祫浜у潎鎸囩幇閲戣祫浜?br>';
+  summary+='闄よ嚜浣忔埧浠ュ鐨勪笉鍔ㄤ骇鎴栧叾浠栬祫浜ц鎶樺悎鎴愮幇閲戣祫浜ц绠?br>';
+  summary+='閫€浼戝悗涓嶅啀鏍哥畻骞存敮鍑猴紝榛樿鐢卞吇鑰侀噾鎴栭€€浼戞椂淇濈暀鏈噾鍏ㄩ瑕嗙洊';
+  summary+='</div>';
+  document.getElementById('resultSummary').innerHTML=summary;
+  
+  // 琛ㄦ牸 - 甯︽潯褰㈠浘 + 鍒嗘鎶樺彔
+  var tbl='<div class="th"><div class="td">骞翠唤</div><div class="td">褰撳勾鏀嚭(涓?<span class="sub-note">鏀嚭闅忛€氳儉鐜囧闀?/span></div><div class="td">骞存湯鏈噾(涓?<span class="sub-note">鍓╀綑鏈噾鎸夋敹鐩婄巼缁х画澧炲€?/span></div></div>';
+  
+  // 鍏ㄩ儴灞曞紑/鎶樺彔鎸夐挳锛堜粎鍒嗘妯″紡锛?  if(schedule.length>10){
+    tbl+='<div id="exportBtnBar" style="display:flex;gap:8px;padding:8px 12px;background:#1a1a25;border-bottom:1px solid #222"><button class="btn-outline" style="flex:1;padding:8px;font-size:12px;border-radius:8px;border:1px solid #333;color:#aaa;background:transparent" onclick="expandAll()">鍏ㄩ儴灞曞紑</button><button class="btn-outline" style="flex:1;padding:8px;font-size:12px;border-radius:8px;border:1px solid #333;color:#aaa;background:transparent" onclick="collapseAll()">鍏ㄩ儴鎶樺彔</button></div>';
+  }
+  
+  if(schedule.length<=10){
+    // 涓嶅垎娈碉紝鍏ㄩ儴鏄剧ず
+    schedule.forEach(function(r){
+      var spendPct=Math.round(r.spending/maxSpend*100);
+      var principalPct=Math.round(r.end/maxPrincipal*100);
+      tbl+='<div class="tr"><div class="td">绗?+r.year+'骞?/div>';
+      tbl+='<div class="td">'+r.spending.toFixed(2)+'<div class="bar-bg"><div class="bar-fill bar-spend" style="width:'+spendPct+'%"></div></div></div>';
+      tbl+='<div class="td">'+r.end.toFixed(2)+'<div class="bar-bg"><div class="bar-fill bar-principal" style="width:'+principalPct+'%"></div></div></div>';
+      tbl+='</div>';
+    });
+  }else{
+    // 鍒?0娈碉紝姣忔鎶樺彔
+    var segCount=10;
+    var segSize=Math.ceil(schedule.length/segCount);
+    for(var seg=0;seg<segCount;seg++){
+      var startIdx=seg*segSize;
+      var endIdx=Math.min(startIdx+segSize,schedule.length);
+      if(startIdx>=schedule.length)break;
+      
+      var segStartYear=schedule[startIdx].year;
+      var segEndYear=schedule[endIdx-1].year;      
+      // 娈垫爣棰?      tbl+='<div class="segment-toggle" onclick="toggleSegment('+seg+')">绗?+segStartYear+'骞?- 绗?+segEndYear+'骞?鈻?/div>';
+      tbl+='<div id="seg-'+seg+'" >';
+      
+      for(var i=startIdx;i<endIdx;i++){
+        var r=schedule[i];
+        var spendPct=Math.round(r.spending/maxSpend*100);
+        var principalPct=Math.round(r.end/maxPrincipal*100);
+        tbl+='<div class="tr"><div class="td">绗?+r.year+'骞?/div>';
+        tbl+='<div class="td">'+r.spending.toFixed(2)+'<div class="bar-bg"><div class="bar-fill bar-spend" style="width:'+spendPct+'%"></div></div></div>';
+        tbl+='<div class="td">'+r.end.toFixed(2)+'<div class="bar-bg"><div class="bar-fill bar-principal" style="width:'+principalPct+'%"></div></div></div>';
+        tbl+='</div>';
+      }
+      tbl+='</div>';
+    }
+  }
+  document.getElementById('resultTable').innerHTML=tbl;
+  
+  showView('result-view');
+}
+
+function toggleSegment(seg){
+  var el=document.getElementById('seg-'+seg);
+  el.classList.toggle('segment-collapsed');
+}
+function expandAll(){
+  document.querySelectorAll('[id^=seg-]').forEach(function(el){el.classList.remove('segment-collapsed')});
+}
+function collapseAll(){
+  document.querySelectorAll('[id^=seg-]').forEach(function(el){el.classList.add('segment-collapsed')});
+}
+
+// ===== 閲嶆柊璁＄畻 =====
+function recalc(){
+  renderQuick();
+  showView('quick-view');
+}
+
+// ===== 瀵煎嚭鍥剧墖 =====
+function exportImg(){
+  // 灞曞紑鎵€鏈夋姌鍙犳
+  document.querySelectorAll('.segment-collapsed').forEach(function(el){el.classList.remove('segment-collapsed')});
+  // 灞曞紑鍙傛暟鎽樿
+  var summaryDiv=document.querySelector('#resultSummary .collapsed');
+  if(summaryDiv)summaryDiv.classList.remove('collapsed');
+  // 闅愯棌鍏ㄩ儴灞曞紑/鎶樺彔鎸夐挳
+  var btnBar=document.getElementById('exportBtnBar');
+  if(btnBar)btnBar.style.display='none';
+  setTimeout(function(){
+    var node=document.getElementById('resultCapture');
+    html2canvas(node,{backgroundColor:'#0a0a0f',scale:2}).then(function(canvas){
+      var link=document.createElement('a');
+      link.download='fire-code.png';
+      link.href=canvas.toDataURL('image/png');
+      link.click();
+      // 鎭㈠鎸夐挳鏄剧ず
+      if(btnBar)btnBar.style.display='flex';
+    });
+  },200);
+}
+
+// ===== 鍒濆鍖?=====
+renderQuick();
+</script>
+</body>
+</html>
